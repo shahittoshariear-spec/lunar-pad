@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Notepad</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="sidebar-top">
+        <button id="toggleSidebarBtn" title="Hide sidebar">&#9776;</button>
+        <input type="text" id="searchInput" placeholder="Search notes..." autocomplete="off">
+        <button id="newNoteBtn" title="New note">+</button>
+      </div>
+      <div id="noteList"></div>
+    </aside>
+
+    <button id="revealSidebarBtn" title="Show sidebar">&#9776;</button>
+
+    <main id="editor">
+      <div id="editorTopRow">
+        <input type="text" id="titleInput" placeholder="Untitled" autocomplete="off">
+        <div id="wordCount" class="word-count">0 words</div>
+        <button id="saveAsBtn" title="Save As a file (.txt, .py, .json, etc)">Save As&hellip;</button>
+      </div>
+
+      <div id="formatToolbar">
+        <button id="boldBtn" class="fmt-btn" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button id="italicBtn" class="fmt-btn" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button id="underlineBtn" class="fmt-btn" title="Underline (Ctrl+U)"><u>U</u></button>
+        <span class="toolbar-divider"></span>
+        <button id="bulletBtn" class="fmt-btn" title="Bulleted list">&bull; List</button>
+        <button id="numberBtn" class="fmt-btn" title="Numbered list">1. List</button>
+        <span class="toolbar-divider"></span>
+        <select id="fontSelect" title="Font">
+          <option value="">Default font</option>
+          <option value="Georgia, 'Times New Roman', serif">Serif</option>
+          <option value="Consolas, 'Courier New', monospace">Monospace</option>
+          <option value="'Segoe UI', sans-serif">Rounded</option>
+        </select>
+      </div>
+
+      <div id="bodyEditor" contenteditable="true" spellcheck="true"></div>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
