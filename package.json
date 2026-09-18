@@ -1,6 +1,6 @@
 {
   "name": "vertical-notepad",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A notepad app with note titles as vertical tabs and transparent auto-save.",
   "main": "main.js",
   "author": "You",
