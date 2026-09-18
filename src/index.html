@@ -10,10 +10,22 @@
     <aside id="sidebar">
       <div class="sidebar-top">
         <button id="toggleSidebarBtn" title="Hide sidebar">&#9776;</button>
-        <input type="text" id="searchInput" placeholder="Search notes..." autocomplete="off">
-        <button id="newNoteBtn" title="New note">+</button>
+        <input type="text" id="searchInput" placeholder="Search notes... (Ctrl+F)" autocomplete="off">
+        <button id="newNoteBtn" title="New note (Ctrl+N)">+</button>
       </div>
       <div id="noteList"></div>
+      <div class="sidebar-bottom">
+        <button id="themeBtn" title="Change theme">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="8" r="1.2" fill="currentColor" stroke="none"></circle>
+            <circle cx="15.5" cy="12" r="1.2" fill="currentColor" stroke="none"></circle>
+            <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"></circle>
+            <circle cx="8.5" cy="12" r="1.2" fill="currentColor" stroke="none"></circle>
+          </svg>
+          Theme
+        </button>
+      </div>
     </aside>
 
     <button id="revealSidebarBtn" title="Show sidebar">&#9776;</button>
@@ -39,10 +51,52 @@
           <option value="Consolas, 'Courier New', monospace">Monospace</option>
           <option value="'Segoe UI', sans-serif">Rounded</option>
         </select>
+        <span class="toolbar-divider"></span>
+        <div class="symbol-wrap">
+          <button id="symbolBtn" class="fmt-btn" title="Insert symbol">&Omega;</button>
+          <div id="symbolPanel" class="symbol-panel" hidden></div>
+        </div>
+        <span class="toolbar-divider"></span>
+        <button id="duplicateBtn" class="fmt-btn" title="Duplicate note (Ctrl+D)">&#10697;</button>
       </div>
 
       <div id="bodyEditor" contenteditable="true" spellcheck="true"></div>
     </main>
+  </div>
+
+  <!-- Theme picker -->
+  <div id="themeOverlay" class="theme-overlay" hidden>
+    <div class="theme-card">
+      <h2>Choose a theme</h2>
+      <p>Pick a preset, or drag the ring below to craft your own accent.</p>
+
+      <div class="preset-label">Presets</div>
+      <div id="presetGrid" class="preset-grid"></div>
+
+      <div class="preset-label">Custom</div>
+      <div id="hueWheel" class="hue-wheel">
+        <div id="hueHandle" class="hue-handle"></div>
+      </div>
+      <button id="themeContinueBtn" class="btn btn-accent">Use this custom color</button>
+    </div>
+  </div>
+
+  <!-- Delete confirmation -->
+  <div id="confirmOverlay" class="confirm-overlay" hidden>
+    <div class="confirm-card">
+      <h3 id="confirmTitle">Delete this note?</h3>
+      <p>This can't be undone.</p>
+      <div class="confirm-actions">
+        <button id="confirmCancel" class="btn btn-ghost">Cancel</button>
+        <button id="confirmDelete" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Undo-delete toast -->
+  <div id="undoToast" class="undo-toast" hidden>
+    <span>Note deleted</span>
+    <button id="undoBtn">Undo</button>
   </div>
 
   <script src="renderer.js"></script>

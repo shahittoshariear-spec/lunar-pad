@@ -1,12 +1,6 @@
-const { app, BrowserWindow, ipcMain, session, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, session, dialog, Menu, MenuItem } = require("electron");
 const path = require("path");
 const fs = require("fs");
-
-// Memory-saving flags. Disabling hardware acceleration removes Electron's
-// separate GPU process entirely - for a plain text app with no animations
-// or video, that process isn't buying much, but it does cost real memory.
-app.disableHardwareAcceleration();
-app.commandLine.appendSwitch("js-flags", "--max-old-space-size=128");
 
 function getNotesPath() {
   return path.join(app.getPath("userData"), "notes.json");
@@ -19,7 +13,7 @@ function loadNotes() {
     if (!Array.isArray(parsed.notes)) return { notes: [] };
     return parsed;
   } catch (e) {
-    return { notes: [] }; // first run, or file doesn't exist yet
+    return { notes: [] };
   }
 }
 
@@ -36,7 +30,8 @@ function createWindow() {
     minWidth: 640,
     minHeight: 420,
     backgroundColor: "#0d1420",
-    autoHideMenuBar: true, // no File/Edit/... menu bar - keeps it clean like a simple notepad
+    autoHideMenuBar: true,
+    icon: path.join(__dirname, "assets", "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -46,6 +41,40 @@ function createWindow() {
   });
   session.defaultSession.setSpellCheckerLanguages(["en-US"]);
   mainWindow.loadFile(path.join(__dirname, "src", "index.html"));
+
+  mainWindow.webContents.on("context-menu", (event, params) => {
+    const menu = new Menu();
+
+    if (params.misspelledWord) {
+      if (params.dictionarySuggestions.length === 0) {
+        menu.append(new MenuItem({ label: "No spelling suggestions", enabled: false }));
+      } else {
+        params.dictionarySuggestions.slice(0, 5).forEach((suggestion) => {
+          menu.append(new MenuItem({
+            label: suggestion,
+            click: () => mainWindow.webContents.replaceMisspelling(suggestion),
+          }));
+        });
+      }
+      menu.append(new MenuItem({
+        label: "Add to dictionary",
+        click: () => session.defaultSession.addWordToSpellCheckerDictionary(params.misspelledWord),
+      }));
+      menu.append(new MenuItem({ type: "separator" }));
+    }
+
+    if (params.isEditable) {
+      menu.append(new MenuItem({ label: "Cut", role: "cut", enabled: params.editFlags.canCut }));
+      menu.append(new MenuItem({ label: "Copy", role: "copy", enabled: params.editFlags.canCopy }));
+      menu.append(new MenuItem({ label: "Paste", role: "paste", enabled: params.editFlags.canPaste }));
+      menu.append(new MenuItem({ type: "separator" }));
+      menu.append(new MenuItem({ label: "Select All", role: "selectAll" }));
+    } else if (params.selectionText) {
+      menu.append(new MenuItem({ label: "Copy", role: "copy" }));
+    }
+
+    if (menu.items.length > 0) menu.popup();
+  });
 }
 
 app.whenReady().then(() => {

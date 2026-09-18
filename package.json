@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A notepad app with note titles as vertical tabs and transparent auto-save.",
   "main": "main.js",
-  "author": "SS",
+  "author": "You",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -17,8 +17,8 @@
     "appId": "com.yourname.verticalnotepad",
     "productName": "Notepad",
     "directories": { "output": "dist" },
-    "files": ["main.js", "preload.js", "src/**/*"],
-    "win": { "target": "nsis" },
+    "files": ["main.js", "preload.js", "src/**/*", "assets/**/*"],
+    "win": { "target": "nsis", "icon": "assets/icon.ico" },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
