@@ -239,6 +239,9 @@
           </button>
         </div>
         <div class="foot-row">
+          <button class="btn btn-icon" id="collapseSidebar" title="Hide the note list (Ctrl+\)" aria-label="Hide the note list">
+            <svg><use href="#i-sidebar"/></svg>
+          </button>
           <select class="select" id="sortSelect" title="Sort notes" aria-label="Sort notes">
             <option value="updated">Recent</option>
             <option value="created">Created</option>
@@ -273,6 +276,10 @@
           <button class="btn btn-icon" id="settingsBtn" title="Settings"><svg><use href="#i-sliders"/></svg></button>
         </div>
       </div>
+
+      <!-- Drag the edge to change how much room the note list takes. -->
+      <div class="sidebar-resizer" id="sidebarResizer" role="separator" aria-orientation="vertical"
+           aria-label="Resize the note list" title="Drag to resize, double-click to reset"></div>
     </aside>
 
     <!-- ----------------------------------------------------- editor -- -->
@@ -390,7 +397,7 @@
     </main>
   </div>
 
-  <button class="btn btn-icon reveal-rail" id="revealSidebar" title="Show notes (Ctrl+\)">
+  <button class="btn btn-icon reveal-rail" id="revealSidebar" title="Show the note list (Ctrl+\)" aria-label="Show the note list">
     <svg><use href="#i-sidebar"/></svg>
   </button>
 </div>

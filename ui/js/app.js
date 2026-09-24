@@ -6,7 +6,7 @@
  * the stylesheet is written against.
  */
 
-import { $, el, icon, installRipples, prefersReducedMotion, rafThrottle } from './dom.js';
+import { $, clamp, el, icon, installRipples, prefersReducedMotion, rafThrottle } from './dom.js';
 import { api, isDesktop } from './api.js';
 import { createAmbient } from './ambient.js';
 import {
@@ -47,6 +47,7 @@ import {
 } from './state.js';
 
 const appEl = $('#app');
+const sidebarEl = $('#sidebar');
 const saveStatus = $('#saveStatus');
 const saveText = $('#saveText');
 const searchWrap = $('#searchWrap');
@@ -68,6 +69,11 @@ const EDITOR_WIDTHS = {
   wide: '60rem',
   full: '100%',
 };
+
+/** Bounds for dragging the note list's edge. */
+const SIDEBAR_MIN = 208;
+const SIDEBAR_MAX = 520;
+const SIDEBAR_DEFAULT = 280;
 
 /**
  * Push the settings into the document.
@@ -96,6 +102,7 @@ function applySettings(settings, { animateTheme = true } = {}) {
   root.style.setProperty('--editor-line', String(settings.lineHeight || 1.7));
   root.style.setProperty('--font-body', settings.font ? settings.font : 'var(--font-ui)');
   root.style.setProperty('--editor-measure', EDITOR_WIDTHS[settings.editorWidth] ?? EDITOR_WIDTHS.cozy);
+  root.style.setProperty('--sidebar-w', `${settings.sidebarWidth || SIDEBAR_DEFAULT}px`);
 
   root.dataset.reducedMotion = settings.reducedMotion || prefersReducedMotion() ? 'true' : 'false';
   root.dataset.focusMode = settings.focusMode ? 'true' : 'false';
@@ -190,8 +197,10 @@ function initSidebarControls() {
     requestAnimationFrame(() => $('#titleInput').focus());
   });
 
-  const collapse = (collapsed) => updateSettings({ sidebarCollapsed: collapsed }, { immediate: true });
+  const collapse = (collapsed) =>
+    updateSettings({ sidebarCollapsed: collapsed }, { immediate: true });
 
+  $('#collapseSidebar').addEventListener('click', () => collapse(true));
   $('#revealSidebar').addEventListener('click', () => collapse(false));
   $('#focusBtn').addEventListener('click', () => updateSettings({ focusMode: !state.settings.focusMode }));
   $('#typerBtn').addEventListener('click', () => updateSettings({ typewriter: !state.settings.typewriter }));
@@ -300,6 +309,92 @@ function initSidebarControls() {
 }
 
 // ============================================================== window ====
+
+/**
+ * Dragging the note list's edge to resize it.
+ *
+ * Pointer capture keeps the drag alive when the pointer leaves the 8px strip,
+ * which is essential — nobody drags in a perfectly straight line. The width is
+ * written straight to the CSS variable during the drag (with the sidebar's
+ * transition suspended) and only persisted on release, so a drag does not
+ * queue dozens of settings writes.
+ */
+function initSidebarResize() {
+  const resizer = $('#sidebarResizer');
+  if (!resizer) return;
+
+  const root = document.documentElement;
+  let startX = 0;
+  let startWidth = 0;
+  let dragging = false;
+
+  const applyWidth = (value) => root.style.setProperty('--sidebar-w', `${value}px`);
+
+  resizer.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+
+    dragging = true;
+    startX = event.clientX;
+    startWidth = sidebarEl.getBoundingClientRect().width;
+
+    resizer.setPointerCapture(event.pointerId);
+    resizer.classList.add('is-dragging');
+    root.classList.add('is-resizing');
+  });
+
+  resizer.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    const next = clamp(Math.round(startWidth + (event.clientX - startX)), SIDEBAR_MIN, SIDEBAR_MAX);
+    applyWidth(next);
+  });
+
+  const finish = (event) => {
+    if (!dragging) return;
+    dragging = false;
+
+    resizer.classList.remove('is-dragging');
+    root.classList.remove('is-resizing');
+    if (resizer.hasPointerCapture?.(event.pointerId)) resizer.releasePointerCapture(event.pointerId);
+
+    updateSettings(
+      { sidebarWidth: Math.round(sidebarEl.getBoundingClientRect().width) },
+      { immediate: true },
+    );
+  };
+
+  resizer.addEventListener('pointerup', finish);
+  resizer.addEventListener('pointercancel', finish);
+
+  // Double-click restores the default width. The horizontal axis makes this
+  // guessable, and the two arrow keys make it reachable without a pointer.
+  resizer.addEventListener('dblclick', () => {
+    applyWidth(SIDEBAR_DEFAULT);
+    updateSettings({ sidebarWidth: SIDEBAR_DEFAULT }, { immediate: true });
+  });
+
+  resizer.addEventListener('keydown', (event) => {
+    const step = event.shiftKey ? 32 : 8;
+    const current = sidebarEl.getBoundingClientRect().width;
+
+    if (event.key === 'ArrowLeft') event.preventDefault();
+    else if (event.key === 'ArrowRight') event.preventDefault();
+    else if (event.key === 'Home') event.preventDefault();
+    else return;
+
+    const next =
+      event.key === 'Home'
+        ? SIDEBAR_DEFAULT
+        : clamp(
+            Math.round(current + (event.key === 'ArrowRight' ? step : -step)),
+            SIDEBAR_MIN,
+            SIDEBAR_MAX,
+          );
+
+    applyWidth(next);
+    updateSettings({ sidebarWidth: next }, { immediate: true });
+  });
+}
 
 function initWindowChrome() {
   $('#winMin').addEventListener('click', () => api.windowMinimise());
@@ -717,6 +812,7 @@ async function boot() {
   initFind();
   initPalette(paletteActions);
   initSidebarControls();
+  initSidebarResize();
   initWindowChrome();
   initSearch();
   initShortcuts();

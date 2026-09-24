@@ -238,6 +238,51 @@
   pointer-events: none;
 }
 
+/* --------------------------------------------------------- resizer ----- */
+
+/* The grab strip sits inside the sidebar's right edge, so it never overlaps
+   the editor's text or its scrollbar. */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  z-index: 6;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  inset: 0 3px;
+  background: transparent;
+  transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.is-dragging::after {
+  background: var(--accent);
+  box-shadow: 0 0 9px var(--accent-glow);
+}
+
+.app.sidebar-hidden .sidebar-resizer {
+  display: none;
+}
+
+/* While dragging, the sidebar must not ease toward the pointer — the 420ms
+   collapse transition would make the edge feel like it was on a rubber band. */
+:root.is-resizing .body {
+  transition: none;
+}
+
+:root.is-resizing,
+:root.is-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
 .sidebar-head {
   padding: 12px 12px 8px;
   display: flex;
@@ -272,11 +317,23 @@
   gap: 6px;
 }
 
+/* The sidebar can be dragged as narrow as 208px, where the sort control is the
+   only thing in the row that can give up any room. */
+.foot-row .select {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.foot-row .btn-icon {
+  flex: none;
+}
+
 /* A held-open gap on the right so the sidebar toggle has somewhere to live
-   when the sidebar is hidden. */
+   when the sidebar is hidden. Sits below the title bar, where the button it
+   replaces used to be. */
 .reveal-rail {
   position: absolute;
-  top: 10px;
+  top: calc(var(--titlebar-h) + 10px);
   left: 10px;
   z-index: 5;
   opacity: 0;

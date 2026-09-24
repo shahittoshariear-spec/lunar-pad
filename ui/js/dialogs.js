@@ -16,6 +16,14 @@ import { toast, reportError } from './toast.js';
 
 const overlayRoot = $('#overlayRoot');
 
+/**
+ * Open dialogs, innermost last.
+ *
+ * Escape must peel the stack one layer at a time — a settings panel that
+ * opened the appearance panel should not close both at once.
+ */
+const modalStack = [];
+
 // ================================================================ modal ====
 
 /**
@@ -44,8 +52,12 @@ function openModal({
     onClick: () => close(),
   }, [icon('i-x')]);
 
+  const entry = {};
+
   const close = () => {
     if (!root.isConnected) return;
+    const at = modalStack.indexOf(entry);
+    if (at !== -1) modalStack.splice(at, 1);
     releaseTrap.current?.();
     document.removeEventListener('keydown', onKeydown, true);
     root.remove();
@@ -53,11 +65,12 @@ function openModal({
   };
 
   const onKeydown = (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
-      close();
-    }
+    if (event.key !== 'Escape') return;
+    // Only the topmost dialog reacts.
+    if (modalStack[modalStack.length - 1] !== entry) return;
+    event.preventDefault();
+    event.stopPropagation();
+    close();
   };
 
   const card = el('div', { class: `modal-card${wide ? ' is-wide' : ''}`, role: 'dialog', 'aria-modal': 'true' }, [
@@ -83,6 +96,7 @@ function openModal({
   }, [card]);
 
   overlayRoot.append(root);
+  modalStack.push(entry);
 
   // Stop app-level shortcuts from firing while a dialog is up.
   root.addEventListener('keydown', (event) => {
@@ -416,7 +430,7 @@ export function settingsDialog() {
     ]),
   ];
 
-  return openModal({
+  const dialog = openModal({
     title: 'Settings',
     subtitle: `${state.notes.length} notes · ${symbolCount()} symbols available`,
     iconId: 'i-sliders',
@@ -443,6 +457,8 @@ export function settingsDialog() {
       }),
     ],
   });
+
+  return dialog;
 }
 
 // =============================================================== themes ====
@@ -613,7 +629,7 @@ export function themeDialog() {
   paintGrid();
   refreshPreview();
 
-  return openModal({
+  const dialog = openModal({
     title: 'Appearance',
     subtitle: 'Pick a preset, or drag the ring for a colour of your own',
     iconId: 'i-palette',
@@ -644,6 +660,8 @@ export function themeDialog() {
       }),
     ],
   });
+
+  return dialog;
 }
 
 // ============================================================ shortcuts ====
@@ -684,7 +702,7 @@ export function shortcutsDialog() {
     ]),
   );
 
-  return openModal({
+  const dialog = openModal({
     title: 'Keyboard shortcuts',
     subtitle: 'Everything is reachable without the mouse',
     iconId: 'i-keyboard',
@@ -701,12 +719,14 @@ export function shortcutsDialog() {
       }),
     ],
   });
+
+  return dialog;
 }
 
 // ================================================================ about ====
 
 export function aboutDialog() {
-  return openModal({
+  const dialog = openModal({
     title: 'Lunar Pad',
     subtitle: 'Version 2.0.0',
     iconId: 'i-lunar',
@@ -756,6 +776,8 @@ export function aboutDialog() {
       }),
     ],
   });
+
+  return dialog;
 }
 
 // =============================================================== menus ====

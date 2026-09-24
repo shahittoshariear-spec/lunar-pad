@@ -50,6 +50,8 @@ pub struct Settings {
 
     pub sort: SortMode,
     pub sidebar_collapsed: bool,
+    /// Width of the note list in pixels, set by dragging its edge.
+    pub sidebar_width: u32,
 
     pub font: String,
     pub font_size: u32,
@@ -85,6 +87,7 @@ impl Default for Settings {
 
             sort: SortMode::Updated,
             sidebar_collapsed: false,
+            sidebar_width: 280,
 
             font: String::new(),
             font_size: 16,

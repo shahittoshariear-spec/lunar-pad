@@ -27,6 +27,7 @@ export const state = {
     themeAccent: '',
     sort: 'updated',
     sidebarCollapsed: false,
+    sidebarWidth: 280,
     font: '',
     fontSize: 16,
     lineHeight: 1.7,
@@ -293,7 +294,12 @@ export function createNote({ title = '', body = '' } = {}) {
 
   structural(() => api.saveNote(note)).catch((error) => reportSave('error', error));
 
+  // Subscribers render from these events, so *every* path that moves the
+  // caret to another note has to announce it — otherwise the editor keeps
+  // showing the previous note while state points somewhere else.
   emit('notes-changed', { reason: 'create', id: note.id });
+  emit('view-changed', state.view);
+  emit('current-changed', note.id);
   return note;
 }
 
@@ -316,6 +322,7 @@ export async function duplicateNote(id) {
     state.currentId = copy.id;
     await api.saveNote(copy);
     emit('notes-changed', { reason: 'duplicate', id: copy.id });
+    emit('current-changed', copy.id);
     return copy;
   });
 }
