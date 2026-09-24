@@ -1,0 +1,235 @@
+/* ============================================================================
+   Animations.
+
+   Two rules keep motion feeling deliberate rather than decorative:
+
+   1. Things that appear move *up and in*; things that leave move *down and
+      out*. That single convention makes entrances and exits read as opposites
+      without any extra styling.
+   2. Nothing bounces on a property that also carries meaning (size, colour),
+      so the spring curve is reserved for transforms.
+
+   All of this is disabled wholesale by data-reduced-motion, set in base.css.
+   ========================================================================= */
+
+/* ------------------------------------------------------------ keyframes -- */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sink {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes pop {
+  0%   { opacity: 0; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.7; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 0.9; }
+}
+
+/* A drifting orbit, used by the ambient layer's ring accents. */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Note deletion: particles are flung outward and fade. Each particle gets its
+   own --dx/--dy/--rot set inline, so one keyframe serves them all. */
+@keyframes dust {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.35) rotate(var(--rot));
+  }
+}
+
+@keyframes note-leave {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-24px) scale(0.96);
+    filter: blur(3px);
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+/* Undo toast drops in from the bottom edge and settles. */
+@keyframes toast-in {
+  0%   { opacity: 0; transform: translate(-50%, 24px) scale(0.96); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes toast-out {
+  0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, 16px) scale(0.97); }
+}
+
+/* The editor's content cross-fades when switching notes, so the switch is
+   legible instead of an instant swap. */
+@keyframes note-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------- utilities --- */
+
+.anim-rise {
+  animation: rise var(--t-base) var(--ease-out) both;
+}
+
+.anim-fade {
+  animation: fade-in var(--t-base) var(--ease-out) both;
+}
+
+.anim-pop {
+  animation: pop var(--t-base) var(--ease-spring) both;
+}
+
+.anim-slide-right {
+  animation: slide-from-right var(--t-base) var(--ease-out) both;
+}
+
+.anim-shake {
+  animation: shake 0.4s var(--ease) both;
+}
+
+/* Applied to each sidebar tab, with --i set to its index, so a list animates
+   in sequence rather than all at once. Capped so a long list never feels
+   sluggish to appear. */
+.anim-stagger {
+  animation: rise var(--t-base) var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 22ms);
+}
+
+/* ------------------------------------------------------- delete effect -- */
+
+.dust-overlay {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.dust-particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: dust 700ms var(--ease-out) both;
+  will-change: transform, opacity;
+}
+
+.note-tab.is-leaving {
+  animation: note-leave 260ms var(--ease) both;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ skeleton -- */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-hover) 0%,
+    var(--bg-active) 50%,
+    var(--bg-hover) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--r-sm);
+}
+
+/* --------------------------------------------------------- save status -- */
+
+/* The autosave dot breathes while a write is in flight, then settles. */
+.save-dot.is-saving {
+  animation: glow-breathe 900ms var(--ease) infinite;
+}
+
+.save-dot.is-saved {
+  animation: pulse-ring 620ms var(--ease-out) 1;
+}
+
+/* ------------------------------------------------------------- motion --- */
+
+/* Ripple, emitted on pointer-down by js/dom.js. */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: currentColor;
+  opacity: 0.22;
+  pointer-events: none;
+  animation: ripple-grow 520ms var(--ease-out) forwards;
+}
+
+@keyframes ripple-grow {
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Baseline permissions for the Lunar Pad window. All file and dialog access happens in Rust, so the webview is granted only the core IPC surface.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

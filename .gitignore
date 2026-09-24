@@ -1,3 +1,16 @@
-node_modules/
-dist/
-*.log
+# Rust build output.
+/src-tauri/target/
+
+# Schemas Tauri generates from the capability files at build time.
+/src-tauri/gen/schemas/
+
+# Icons derived from assets/lunar-pad-icon.png by `cargo tauri icon`. They are
+# regenerated on demand, but Windows needs icon.ico present to build at all, so
+# the generated set is committed rather than ignored.
+
+# Editor and OS noise.
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini

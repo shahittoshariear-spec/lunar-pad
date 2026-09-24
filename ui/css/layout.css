@@ -1,0 +1,505 @@
+/* ============================================================================
+   Layout: the window shell, title bar, sidebar and editor.
+
+   The window is undecorated, so this file also owns the chrome the OS would
+   normally draw — the drag region and the minimise/maximise/close buttons.
+   ========================================================================= */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  /* Clipping here is what gives the window its rounded silhouette when the
+     platform composites the frameless window. */
+  overflow: hidden;
+  position: relative;
+}
+
+/* ----------------------------------------------------------- ambient ----- */
+
+/* The drifting starfield, painted behind everything. It is pointer-transparent
+   and sits under the editor, which has its own opaque background — so the
+   stars are visible around the edges of the reading column, not through it. */
+.ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.ambient canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* A single soft accent bleed, echoing the glow around the icon's orbit. */
+.ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      70rem 32rem at 12% -8%,
+      color-mix(in srgb, var(--accent) 13%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      52rem 30rem at 92% 108%,
+      color-mix(in srgb, var(--accent-2) 11%, transparent),
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------- titlebar ----- */
+
+.titlebar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  height: var(--titlebar-h);
+  flex: 0 0 var(--titlebar-h);
+  padding-left: 12px;
+  background: color-mix(in srgb, var(--bg-panel) 78%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.brand-mark {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  /* A miniature of the icon: crescent over a deep space gradient. */
+  background:
+    radial-gradient(circle at 68% 32%, color-mix(in srgb, var(--text) 92%, transparent) 0 26%, transparent 27%),
+    radial-gradient(circle at 40% 62%, var(--accent) 0 40%, var(--accent-2) 100%);
+  box-shadow: 0 0 12px var(--accent-glow);
+  flex: none;
+}
+
+/* The drag region. Fills whatever the brand and buttons do not claim, so the
+   window can be moved from anywhere along the bar. */
+.titlebar-drag {
+  flex: 1 1 auto;
+  height: 100%;
+  min-width: 40px;
+}
+
+.titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  padding-right: 6px;
+}
+
+/* Save status sits in the chrome, where it is informative but never in the
+   way of the text. */
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.save-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex: none;
+  transition: background var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+
+.save-status[data-state="saving"] .save-dot {
+  background: var(--warn);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 22%, transparent);
+}
+
+.save-status[data-state="saved"] .save-dot {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent);
+}
+
+.save-status[data-state="error"] .save-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+.save-status[data-state="error"] {
+  color: var(--danger);
+}
+
+/* Window buttons are square and flat, matching the native affordance, but the
+   close button picks up a red wash on hover as users expect. */
+.win-btn {
+  width: 40px;
+  height: var(--titlebar-h);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: default;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.win-btn:hover {
+  background: var(--bg-active);
+  color: var(--text);
+}
+
+.win-btn:active {
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+}
+
+.win-btn.is-close:hover {
+  background: #e5484d;
+  color: #fff;
+}
+
+.win-btn svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* -------------------------------------------------------------- body ----- */
+
+.body {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  transition: grid-template-columns var(--t-slow) var(--ease);
+}
+
+.app.sidebar-hidden .body {
+  grid-template-columns: 0 1fr;
+}
+
+/* ----------------------------------------------------------- sidebar ----- */
+
+.sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition:
+    transform var(--t-slow) var(--ease),
+    opacity var(--t-base) var(--ease);
+}
+
+.app.sidebar-hidden .sidebar {
+  transform: translateX(-28px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A faint vertical accent edge, echoing the icon's lit rim. */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--accent) 40%, transparent) 22%,
+    color-mix(in srgb, var(--accent-2) 32%, transparent) 78%,
+    transparent
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.sidebar-head {
+  padding: 12px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: none;
+}
+
+.sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-foot {
+  flex: none;
+  padding: 9px 12px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.foot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A held-open gap on the right so the sidebar toggle has somewhere to live
+   when the sidebar is hidden. */
+.reveal-rail {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  opacity: 0;
+  transform: translateX(-10px) scale(0.9);
+  pointer-events: none;
+  transition:
+    opacity var(--t-base) var(--ease),
+    transform var(--t-base) var(--ease-spring);
+}
+
+.app.sidebar-hidden .reveal-rail {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+  transition-delay: 90ms;
+}
+
+/* ------------------------------------------------------------ editor ----- */
+
+.editor-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.editor-head {
+  flex: none;
+  padding: 18px 26px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editor-head-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* The title is a borderless input that looks like a heading until focused. */
+.title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -0.022em;
+  line-height: 1.25;
+  padding: 2px 0;
+  user-select: text;
+}
+
+.title-input::placeholder {
+  color: var(--text-faint);
+  font-weight: 550;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 26px;
+  margin-left: 2px;
+}
+
+.stats {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 2px;
+}
+
+/* The formatting bar sticks to the top of the text column and fades out while
+   the user is reading rather than writing. */
+.toolbar {
+  flex: none;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  padding: 7px 22px;
+  background: color-mix(in srgb, var(--bg-editor) 88%, transparent);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 17px;
+  background: var(--border-strong);
+  margin: 0 5px;
+  flex: none;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.editor-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* The editor pane is very slightly translucent so the starfield reads as depth
+   behind the page, rather than being invisible work. */
+.editor-pane {
+  background: color-mix(in srgb, var(--bg-editor) 93%, transparent);
+}
+
+/* The reading column. Its width is the one typographic decision users are most
+   likely to have an opinion about, so it is a setting. */
+.editor-column {
+  width: 100%;
+  max-width: var(--editor-measure);
+  margin: 0 auto;
+  padding: 26px 26px 45vh;
+}
+
+.editor-body {
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--base-size);
+  line-height: var(--editor-line);
+  user-select: text;
+  caret-color: var(--accent);
+  /* Long unbroken strings (URLs, hashes) must wrap rather than force the whole
+     column wider. */
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.editor-body.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* Focus mode dims everything but the paragraph being edited. The class is
+   toggled on a per-paragraph basis by js/editor.js. */
+:root[data-focus-mode="true"] .editor-body > * {
+  opacity: 0.28;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+:root[data-focus-mode="true"] .editor-body > *.is-focused,
+:root[data-focus-mode="true"] .editor-body > *:hover {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------- empty states --- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 42px 22px;
+  text-align: center;
+  color: var(--text-faint);
+  animation: rise var(--t-slow) var(--ease-out) both;
+}
+
+.empty-state svg {
+  width: 34px;
+  height: 34px;
+  opacity: 0.4;
+}
+
+.empty-state strong {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.empty-state span {
+  font-size: 12px;
+  max-width: 24ch;
+  line-height: 1.5;
+}
+
+/* The full-pane empty state, shown when the trash is being viewed and is
+   empty, or when nothing matches a search. */
+.empty-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 30px;
+}
+
+.empty-pane svg {
+  width: 46px;
+  height: 46px;
+  opacity: 0.32;
+}
+
+.empty-pane h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.empty-pane p {
+  font-size: 12.5px;
+  max-width: 34ch;
+  line-height: 1.6;
+}

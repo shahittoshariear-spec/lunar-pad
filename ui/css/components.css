@@ -1,0 +1,1562 @@
+/* ============================================================================
+   Components: buttons, inputs, note tabs, chips, menus, modals, toasts.
+
+   Everything interactive shares one hover/active/focus vocabulary so the app
+   reads as a single surface rather than a collection of widgets.
+   ========================================================================= */
+
+/* ============================================================== buttons == */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 550;
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  cursor: default;
+  white-space: nowrap;
+  /* Ripples are absolutely positioned children, so the button must clip. */
+  overflow: hidden;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.btn:active {
+  transform: scale(0.975);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: color-mix(in srgb, var(--accent) 80%, #000);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.14) inset, 0 4px 14px var(--accent-glow);
+}
+
+.btn-accent:hover {
+  background: color-mix(in srgb, var(--accent) 88%, #fff);
+  color: var(--accent-ink);
+}
+
+.btn-soft {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.btn-soft:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+}
+
+.btn-outline {
+  border-color: var(--border-strong);
+  color: var(--text-dim);
+}
+
+.btn-outline:hover {
+  border-color: color-mix(in srgb, var(--accent) 46%, transparent);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* An icon-only button: no padding asymmetry, perfectly square hit area. */
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--r-xs);
+  color: var(--text-faint);
+}
+
+.btn-icon:hover {
+  color: var(--text);
+}
+
+.btn-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* =============================================================== inputs == */
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  user-select: text;
+  transition:
+    border-color var(--t-fast) var(--ease),
+    box-shadow var(--t-base) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.input:focus {
+  border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: var(--bg-panel);
+}
+
+/* The search field carries its own magnifier and a clear affordance. */
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search svg {
+  position: absolute;
+  left: 9px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.search:focus-within svg {
+  color: var(--accent);
+}
+
+.search .input {
+  padding-left: 29px;
+  padding-right: 28px;
+}
+
+.search-clear {
+  position: absolute;
+  right: 5px;
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-faint);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.search.has-value .search-clear {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-clear:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.search-clear svg {
+  position: static;
+  width: 12px;
+  height: 12px;
+}
+
+/* A native select restyled to match, with a chevron drawn as a background. */
+.select {
+  appearance: none;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 13px;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 25px 6px 9px;
+  border-radius: var(--r-sm);
+  cursor: default;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.select:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.select:focus {
+  border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.select option {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+/* ========================================================== note tabs === */
+
+.note-tab {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 9px 9px 11px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  cursor: default;
+  overflow: hidden;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+.note-tab:hover {
+  background: var(--bg-hover);
+}
+
+.note-tab:active {
+  transform: scale(0.99);
+}
+
+.note-tab.is-active {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* The accent rail on the left edge marks the open note, so the marker is
+   visible even when the background wash is subtle. */
+.note-tab-rail {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transform: translateY(-50%);
+  transition: height var(--t-base) var(--ease-spring);
+}
+
+.note-tab.is-active .note-tab-rail {
+  height: 62%;
+}
+
+.note-tab-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.note-tab-title {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.note-tab.is-active .note-tab-title {
+  color: var(--text);
+}
+
+.note-tab:hover .note-tab-title {
+  color: var(--text);
+}
+
+.note-tab-preview {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.45;
+}
+
+.note-tab-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+/* Pin and delete stay hidden until the tab is hovered or the pin is set, which
+   keeps the list quiet. They are always reachable by keyboard. */
+.note-tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex: none;
+  opacity: 0;
+  transform: translateX(4px);
+  transition:
+    opacity var(--t-base) var(--ease),
+    transform var(--t-base) var(--ease);
+}
+
+.note-tab:hover .note-tab-actions,
+.note-tab:focus-within .note-tab-actions,
+.note-tab.is-pinned .note-tab-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.note-tab.is-pinned .note-tab-pin {
+  color: var(--accent);
+}
+
+.note-tab-pin,
+.note-tab-del {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-faint);
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease-spring);
+}
+
+.note-tab-pin svg,
+.note-tab-del svg {
+  width: 13px;
+  height: 13px;
+}
+
+.note-tab-pin:hover {
+  background: var(--bg-active);
+  color: var(--accent);
+  transform: scale(1.12) rotate(-12deg);
+}
+
+.note-tab-del:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  transform: scale(1.12);
+}
+
+/* Drag state. The original keeps its place while a translucent ghost follows
+   the pointer, which reads better than removing it outright. */
+.note-tab.is-dragging {
+  opacity: 0.4;
+}
+
+.note-tab.is-drop-target {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-soft);
+}
+
+/* A caret showing exactly where the note will land. */
+.note-tab.is-drop-target::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: -2px;
+  height: 2px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: fade-in var(--t-fast) var(--ease) both;
+}
+
+/* Dropping into the lower half of a tab means "after it", so the caret flips to
+   the bottom edge. */
+.note-tab.is-drop-target[data-drop-side="after"]::before {
+  top: auto;
+  bottom: -2px;
+}
+
+/* Search hits inside a preview. */
+mark {
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* ============================================================== chips === */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: color-mix(in srgb, var(--accent) 82%, var(--text));
+  border: 1px solid transparent;
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+button.chip {
+  cursor: default;
+}
+
+button.chip:hover {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  transform: translateY(-1px);
+}
+
+button.chip:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.chip-x {
+  opacity: 0.55;
+  font-size: 12px;
+  line-height: 1;
+}
+
+button.chip:hover .chip-x {
+  opacity: 1;
+}
+
+/* The tag editor under the title. */
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.tag-input {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 4px;
+  width: 8ch;
+  min-width: 6ch;
+  user-select: text;
+  transition: width var(--t-base) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.tag-input::placeholder {
+  color: var(--text-faint);
+}
+
+.tag-input:focus {
+  color: var(--text);
+  width: 15ch;
+}
+
+.tag-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-faint);
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  border: 1px dashed var(--border-strong);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.tag-add:hover,
+.tag-row:focus-within .tag-add {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
+}
+
+/* ============================================================= switch === */
+
+.switch {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  padding: 0;
+  flex: none;
+  cursor: default;
+  transition:
+    background var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition:
+    transform var(--t-base) var(--ease-spring),
+    background var(--t-base) var(--ease);
+}
+
+.switch[aria-checked="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch[aria-checked="true"]::after {
+  background: var(--accent-ink);
+  transform: translateX(15px);
+}
+
+/* ============================================================== rows === */
+
+/* A settings row: label and description on the left, control on the right. */
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting:last-child {
+  border-bottom: 0;
+}
+
+.setting-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.setting-label {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+.setting-hint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  line-height: 1.5;
+  margin-top: 1px;
+}
+
+.setting-control {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 20px 0 2px;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+/* ============================================================ toolbar === */
+
+.tool {
+  position: relative;
+  width: 29px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-dim);
+  overflow: hidden;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+.tool:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.tool:active {
+  transform: scale(0.93);
+}
+
+.tool.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tool svg {
+  width: 15px;
+  height: 15px;
+}
+
+.tool-wide {
+  width: auto;
+  padding: 0 9px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+/* ============================================================= popups === */
+
+/* Anchors a popup to the control that opened it. */
+.symbol-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Anchored panels: the symbol picker, the overflow menu and the slash menu all
+   share this shell so they arrive the same way. */
+.popup {
+  position: absolute;
+  z-index: 40;
+  background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: pop var(--t-base) var(--ease-spring) both;
+  transform-origin: var(--pop-origin, top left);
+}
+
+.popup-down {
+  top: calc(100% + 7px);
+  left: 0;
+}
+
+.popup-wide {
+  width: min(430px, 88vw);
+}
+
+.popup-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-title {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--text-dim);
+  flex: 1 1 auto;
+}
+
+.popup-body {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 7px;
+}
+
+.popup-foot {
+  padding: 6px 9px;
+  border-top: 1px solid var(--border);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ======================================================= slash menu ==== */
+
+/* Shares the palette's list styling, but is anchored to the caret rather than
+   centred on the window. */
+.slash-menu {
+  position: absolute;
+  width: 292px;
+  max-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+  animation: pop var(--t-fast) var(--ease-spring) both;
+}
+
+.slash-menu .palette-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.slash-menu .palette-head svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  flex: none;
+}
+
+.slash-menu .popup-title {
+  flex: 1 1 auto;
+}
+
+.slash-menu .palette-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 5px;
+}
+
+/* ========================================================== symbol ===== */
+
+.symbol-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 9px 5px 4px;
+}
+
+.symbol-cat:first-child {
+  padding-top: 2px;
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(31px, 1fr));
+  gap: 2px;
+}
+
+.symbol-item {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1;
+  overflow: hidden;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease-spring);
+}
+
+.symbol-item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: scale(1.16);
+}
+
+.symbol-item:active {
+  transform: scale(0.94);
+}
+
+/* ============================================================== modal === */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: color-mix(in srgb, #04040a 62%, transparent);
+  backdrop-filter: blur(7px);
+  animation: fade-in var(--t-base) var(--ease-out) both;
+}
+
+.modal.is-closing {
+  animation: fade-in var(--t-base) var(--ease) reverse both;
+}
+
+.modal-card {
+  width: min(560px, 100%);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  animation: rise var(--t-slow) var(--ease-out) both;
+}
+
+.modal-card.is-wide {
+  width: min(680px, 100%);
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 18px 13px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.modal-head h2 {
+  font-size: 15px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+/* The text block takes the slack so the close button stays pinned right. */
+.modal-headings {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.modal-head p {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 18px 14px;
+}
+
+.modal-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
+}
+
+.modal-foot .spacer {
+  flex: 1 1 auto;
+}
+
+/* ============================================================== toast === */
+
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px 9px 15px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--bg-elevated) 97%, transparent);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(18px);
+  font-size: 12.5px;
+  color: var(--text);
+  pointer-events: auto;
+  animation: toast-in var(--t-slow) var(--ease-out) both;
+}
+
+.toast.is-leaving {
+  animation: toast-out var(--t-base) var(--ease) both;
+}
+
+.toast-action {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  position: relative;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.toast-action:hover {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.toast-icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  color: var(--text-faint);
+}
+
+/* =========================================================== palette === */
+
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 11vh;
+  background: color-mix(in srgb, #04040a 52%, transparent);
+  backdrop-filter: blur(6px);
+  animation: fade-in var(--t-base) var(--ease-out) both;
+}
+
+.palette {
+  width: min(600px, 92vw);
+  max-height: 68vh;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--bg-elevated) 97%, transparent);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  animation: rise var(--t-base) var(--ease-spring) both;
+}
+
+.palette-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.palette-input-wrap svg {
+  width: 17px;
+  height: 17px;
+  color: var(--text-faint);
+  flex: none;
+}
+
+.palette-input {
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  user-select: text;
+}
+
+.palette-input::placeholder {
+  color: var(--text-faint);
+}
+
+.palette-hint {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  padding: 2px 6px;
+  flex: none;
+}
+
+.palette-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+  scroll-padding: 6px;
+}
+
+.palette-group {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 9px 9px 4px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.palette-item svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  opacity: 0.72;
+}
+
+.palette-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* The extra context (note preview, shortcut) is right-aligned and dimmed. */
+.palette-item-note {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-faint);
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.palette-item.is-active .palette-item-label {
+  color: var(--accent);
+}
+
+.palette-item.is-active svg {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.palette-empty {
+  padding: 26px 14px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+/* =============================================================== find === */
+
+.find-bar {
+  position: absolute;
+  top: 8px;
+  right: 22px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--bg-elevated) 97%, transparent);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(18px);
+  animation: slide-from-right var(--t-base) var(--ease-out) both;
+}
+
+.find-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.find-input {
+  width: 190px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 4px 2px;
+  user-select: text;
+}
+
+.find-input::placeholder {
+  color: var(--text-faint);
+}
+
+.find-count {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  min-width: 5ch;
+  text-align: right;
+  padding-right: 3px;
+}
+
+.find-count.is-empty {
+  color: var(--warn);
+}
+
+/* Find-in-note highlights, painted with the CSS Custom Highlight API so the
+   document is never mutated to show a search result. */
+::highlight(find-matches) {
+  background: color-mix(in srgb, var(--warn) 34%, transparent);
+  color: inherit;
+}
+
+::highlight(find-current) {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* =============================================================== kbd ==== */
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  padding: 1.5px 5px;
+  border-radius: 5px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* ============================================================ menu ===== */
+
+.menu {
+  position: absolute;
+  z-index: 45;
+  min-width: 210px;
+  padding: 5px;
+  background: color-mix(in srgb, var(--bg-elevated) 97%, transparent);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(20px);
+  animation: pop var(--t-fast) var(--ease) both;
+  transform-origin: bottom right;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.menu-item svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  opacity: 0.75;
+}
+
+.menu-item .kbd,
+.menu-item .menu-hint {
+  margin-left: auto;
+}
+
+/* The hint is dimmer than the label it trails, so the eye lands on the action. */
+.menu-item .menu-hint {
+  font-size: 10.5px;
+  opacity: 0.75;
+}
+
+.menu-item.is-danger {
+  color: var(--danger);
+}
+
+.menu-item.is-danger:hover {
+  background: var(--danger-soft);
+}
+
+.menu-sep {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--border);
+}
+
+/* ========================================================== dialogs ===== */
+
+.confirm-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+  flex: none;
+}
+
+/* Informational dialogs get the accent instead of the alarm colour. */
+.confirm-icon.is-neutral {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.confirm-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* =========================================================== colours === */
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 7px;
+  padding: 4px 0 8px;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: transparent;
+  overflow: hidden;
+  transition:
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.theme-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  background: var(--bg-hover);
+}
+
+.theme-card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* A miniature of the app rendered in the theme's own colours. */
+.theme-preview {
+  height: 34px;
+  border-radius: var(--r-xs);
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  overflow: hidden;
+}
+
+.theme-preview-side {
+  width: 30%;
+  border-radius: 3px;
+}
+
+.theme-preview-main {
+  flex: 1;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 5px;
+}
+
+.theme-preview-line {
+  height: 3px;
+  border-radius: 2px;
+}
+
+.theme-name {
+  font-size: 11px;
+  font-weight: 550;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-card.is-active .theme-name {
+  color: var(--accent);
+}
+
+/* Custom hue ring. */
+.hue-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 6px 0 12px;
+}
+
+.hue-ring {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  flex: none;
+  /* The conic gradient is the colour wheel; the mask punches out the middle
+     so the handle has a track to sit on. */
+  background: conic-gradient(
+    from 0deg,
+    oklch(70% 0.16 0),
+    oklch(70% 0.16 60),
+    oklch(70% 0.16 120),
+    oklch(70% 0.16 180),
+    oklch(70% 0.16 240),
+    oklch(70% 0.16 300),
+    oklch(70% 0.16 360)
+  );
+  mask: radial-gradient(circle, transparent 52%, #000 53%, #000 100%);
+  -webkit-mask: radial-gradient(circle, transparent 52%, #000 53%, #000 100%);
+  cursor: crosshair;
+}
+
+.hue-handle {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  margin: -9.5px 0 0 -9.5px;
+  border-radius: 50%;
+  border: 3px solid var(--bg-elevated);
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--border-strong), 0 3px 10px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.hue-ring:active .hue-handle {
+  transform: scale(1.18);
+}
+
+.hue-preview {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.hue-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.hue-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
+  transition: transform var(--t-fast) var(--ease-spring);
+}
+
+.hue-swatch:hover {
+  transform: scale(1.1);
+}
+
+/* ============================================================= scroll ==== */
+
+/* A slim scroll indicator for the note list, so it does not compete with the
+   accent-coloured active tab. */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  border-width: 2px;
+}
+
+/* ===================================================== theme swap ====== */
+
+/* Applied for a few hundred milliseconds around a theme change, so colours
+   cross-fade instead of snapping. Only colour properties are animated, so the
+   app's transform transitions are the only casualty — briefly, and by design. */
+:root.theme-transition,
+:root.theme-transition *,
+:root.theme-transition *::before,
+:root.theme-transition *::after {
+  transition:
+    background-color 380ms var(--ease),
+    border-color 380ms var(--ease),
+    color 380ms var(--ease),
+    box-shadow 380ms var(--ease),
+    fill 380ms var(--ease) !important;
+}
+
+/* ============================================================= misc ===== */
+
+.list-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 8px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.list-label .count {
+  margin-left: auto;
+  font-weight: 600;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+/* A row that represents the current view (trash), pinned below the note list. */
+.view-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  overflow: hidden;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.view-row:hover {
+  background: var(--bg-hover);
+  color: var(--text-dim);
+}
+
+.view-row.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.view-row svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.view-row .count {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A destructive row, for "empty trash". */
+.view-row.is-danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Trashed notes are visually distinct without being hard to read. */
+.note-tab.is-trashed .note-tab-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--text-faint);
+}
+
+.note-tab.is-trashed {
+  opacity: 0.68;
+}
+
+.note-tab.is-trashed:hover {
+  opacity: 1;
+}
+
+/* ====================================================== blocked states == */
+
+/* Shown when a write fails, so the user is never silently losing work. */
+.offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+  background: var(--danger-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
+  color: var(--danger);
+  font-size: 12px;
+  animation: rise var(--t-base) var(--ease-out) both;
+}
+
+.offline-banner svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}

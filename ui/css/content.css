@@ -1,0 +1,191 @@
+/* ============================================================================
+   Rich text.
+
+   Styling for what the user actually writes. Kept separate from the app
+   chrome because these rules apply to user content — they need to work for
+   pasted markup, exported HTML and the welcome note alike, not just for what
+   the toolbar can produce.
+   ========================================================================= */
+
+.editor-body > *:first-child {
+  margin-top: 0;
+}
+
+.editor-body p,
+.editor-body div {
+  margin: 0 0 0.85em;
+}
+
+.editor-body h1,
+.editor-body h2,
+.editor-body h3,
+.editor-body h4 {
+  margin: 1.5em 0 0.5em;
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.editor-body h1 { font-size: 1.65em; }
+.editor-body h2 { font-size: 1.32em; }
+.editor-body h3 { font-size: 1.13em; }
+.editor-body h4 { font-size: 1em; }
+
+.editor-body ul,
+.editor-body ol {
+  margin: 0 0 0.9em;
+  padding-left: 1.5em;
+}
+
+.editor-body li {
+  margin: 0.18em 0;
+}
+
+/* Nested lists step down a marker style each level, which is what makes deep
+   outlines readable at a glance. */
+.editor-body ul { list-style: disc; }
+.editor-body ul ul { list-style: circle; }
+.editor-body ul ul ul { list-style: square; }
+.editor-body ol { list-style: decimal; }
+.editor-body ol ol { list-style: lower-alpha; }
+.editor-body ol ol ol { list-style: lower-roman; }
+
+.editor-body li::marker {
+  color: var(--accent);
+}
+
+.editor-body blockquote {
+  margin: 1.1em 0;
+  padding: 0.15em 0 0.15em 1.05em;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 52%, transparent);
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.editor-body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-body pre {
+  margin: 1.1em 0;
+  padding: 0.85em 1em;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-panel) 72%, var(--bg));
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  line-height: 1.6;
+  overflow-x: auto;
+  /* Pre-formatted text must not be re-wrapped by the column width. */
+  white-space: pre-wrap;
+  tab-size: 2;
+}
+
+.editor-body code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.1em 0.36em;
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: color-mix(in srgb, var(--accent) 72%, var(--text));
+}
+
+.editor-body pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: 1em;
+}
+
+.editor-body mark,
+.editor-body [style*="background-color"] {
+  border-radius: 3px;
+}
+
+/* The highlight the toolbar applies. The colour is theme-derived so it stays
+   legible on both light and dark palettes. */
+.editor-body mark {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  color: inherit;
+  padding: 0.05em 0.15em;
+}
+
+.editor-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  text-underline-offset: 2px;
+}
+
+.editor-body a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.editor-body hr {
+  border: 0;
+  height: 1px;
+  margin: 1.7em 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--border-strong) 18%,
+    var(--border-strong) 82%,
+    transparent
+  );
+}
+
+.editor-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+}
+
+.editor-body u {
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, currentColor);
+  text-underline-offset: 2px;
+}
+
+.editor-body s,
+.editor-body strike,
+.editor-body del {
+  color: var(--text-dim);
+}
+
+.editor-body strong,
+.editor-body b {
+  font-weight: 660;
+}
+
+.editor-body table {
+  width: 100%;
+  margin: 1.1em 0;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+
+.editor-body th,
+.editor-body td {
+  border: 1px solid var(--border);
+  padding: 0.45em 0.6em;
+  text-align: left;
+}
+
+.editor-body th {
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  font-weight: 620;
+}
+
+/* Checkboxes, which come in from pasted task lists. */
+.editor-body li[data-checked] {
+  list-style: none;
+  margin-left: -1.4em;
+}
+
+.editor-body li[data-checked]::before {
+  content: "✓";
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 0.45em;
+}
