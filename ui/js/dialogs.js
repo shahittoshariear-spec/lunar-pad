@@ -728,7 +728,7 @@ export function shortcutsDialog() {
 export function aboutDialog() {
   const dialog = openModal({
     title: 'Lunar Pad',
-    subtitle: 'Version 2.0.0',
+    subtitle: 'Version 2.0.1',
     iconId: 'i-lunar',
     body: [
       el('p', {

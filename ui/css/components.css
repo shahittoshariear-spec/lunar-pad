@@ -475,7 +475,12 @@ button.chip:hover .chip-x {
   opacity: 1;
 }
 
-/* The tag editor under the title. */
+/* The tag editor under the title.
+
+   Collapsed it is a small dashed pill holding nothing but a plus, which keeps
+   a row that is usually empty out of the way. Clicking focuses the input it
+   wraps, and the pill grows into a text field. No JavaScript state is needed
+   to switch between the two — the label's `:focus-within` is the switch. */
 .tag-row {
   display: flex;
   align-items: center;
@@ -483,44 +488,70 @@ button.chip:hover .chip-x {
   flex-wrap: wrap;
 }
 
+.tag-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  height: 21px;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-faint);
+  cursor: default;
+  flex: none;
+  transition:
+    color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease),
+    gap var(--t-base) var(--ease);
+}
+
+.tag-add svg {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+
+.tag-add:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
+}
+
+/* Expanded: room for the plus and a readable field. */
+.tag-add:focus-within {
+  gap: 5px;
+  padding-right: 9px;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Zero-width until the pill is focused, so the placeholder never shows in the
+   collapsed state and cannot spill out of a 21px pill. */
 .tag-input {
+  width: 0;
+  min-width: 0;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text-dim);
+  color: var(--text);
   font: inherit;
   font-size: 11px;
-  padding: 2px 4px;
-  width: 8ch;
-  min-width: 6ch;
+  opacity: 0;
   user-select: text;
-  transition: width var(--t-base) var(--ease), color var(--t-fast) var(--ease);
+  transition:
+    width var(--t-base) var(--ease),
+    opacity var(--t-fast) var(--ease);
+}
+
+.tag-add:focus-within .tag-input {
+  width: 12ch;
+  opacity: 1;
 }
 
 .tag-input::placeholder {
   color: var(--text-faint);
-}
-
-.tag-input:focus {
-  color: var(--text);
-  width: 15ch;
-}
-
-.tag-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--text-faint);
-  padding: 2px 6px;
-  border-radius: var(--r-pill);
-  border: 1px dashed var(--border-strong);
-  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
-}
-
-.tag-add:hover,
-.tag-row:focus-within .tag-add {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
 }
 
 /* ============================================================= switch === */

@@ -69,16 +69,26 @@ export function replace(parent, children) {
   return parent;
 }
 
-/** An inline `<svg><use href="#id"/></svg>`, sized by the consuming CSS. */
-export function icon(id, size) {
+/**
+ * An inline `<svg><use href="#id"/></svg>`.
+ *
+ * The size is set as an attribute rather than left to CSS because an SVG with
+ * no width, height or viewBox falls back to the replaced-element default of
+ * 300×150 — which is how a supposedly small icon ends up rendering as a giant
+ * button. Passing an explicit size, or inheriting `1em` from the surrounding
+ * text, removes that failure mode entirely. Sizing rules in the stylesheet
+ * still win, since CSS beats presentation attributes.
+ */
+export function icon(id, size = '1em') {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   use.setAttribute('href', `#${id}`);
   svg.appendChild(use);
-  if (size) {
-    svg.setAttribute('width', size);
-    svg.setAttribute('height', size);
-  }
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  // Icons are decorative; the control that owns them carries the label.
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
   return svg;
 }
 

@@ -286,6 +286,41 @@ console.log('\nresizing the note list:');
   check('the width was persisted', state.state.settings.sidebarWidth === 520);
 }
 
+// ------------------------------------------------- icons are sized (bug 5) --
+
+console.log('\nicons carry an explicit size:');
+{
+  // An SVG with no width, height or viewBox falls back to 300×150, which is
+  // how the add-tag plus rendered as a giant button. Every icon built by the
+  // `icon()` helper is marked aria-hidden, so this is a precise invariant.
+  const generated = $$('svg[aria-hidden="true"]');
+  const unsized = generated.filter(
+    (svg) => !svg.getAttribute('width') || !svg.getAttribute('height'),
+  );
+
+  check('the interface built some icons', generated.length > 0, `found ${generated.length}`);
+  check(
+    'no generated icon is left unsized',
+    unsized.length === 0,
+    `${unsized.length} unsized: ${unsized.map((s) => s.querySelector('use')?.getAttribute('href')).join(', ')}`,
+  );
+}
+
+console.log('\nthe add-tag control is compact:');
+{
+  const add = $('.tag-add');
+  check('the add-tag control exists', add !== null);
+
+  if (add) {
+    // It must contain nothing but its icon and the collapsed input.
+    const label = add.textContent.trim();
+    check('it shows no label text', label === '', `found "${label}"`);
+    check('it holds a single icon', add.querySelectorAll('svg').length === 1);
+    check('that icon is sized', add.querySelector('svg')?.getAttribute('width') === '1em');
+    check('its field is collapsed until focused', add.querySelector('.tag-input') !== null);
+  }
+}
+
 // ------------------------------------------------------------------ report --
 
 console.log('\n--- uncaught errors ---');

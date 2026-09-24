@@ -8,7 +8,7 @@
  * a process listing.
  *
  * Usage:
- *   node tools/publish-release.mjs v2.0.0 dist/LunarPad.exe dist/LunarPad-Setup-2.0.0.exe
+ *   node tools/publish-release.mjs v2.0.1 dist/LunarPad.exe dist/LunarPad-Setup-2.0.1.exe
  *   node tools/publish-release.mjs --check
  *
  * Re-running is safe: an existing release with the same tag is updated, and an

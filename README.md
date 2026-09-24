@@ -100,7 +100,7 @@ cd src-tauri
 cargo tauri build
 ```
 
-This produces `Lunar Pad_2.0.0_x64-setup.exe` in
+This produces `Lunar Pad_2.0.1_x64-setup.exe` in
 `src-tauri/target/release/bundle/nsis/`. Run it and it installs like any other
 Windows app, with a Start Menu entry and an uninstaller.
 
@@ -114,11 +114,11 @@ the file later does not reclaim the space. Builds belong on the Releases page.
 cd src-tauri && cargo tauri build && cd ..
 
 cp src-tauri/target/release/lunar-pad.exe                       dist/LunarPad.exe
-cp "src-tauri/target/release/bundle/nsis/Lunar Pad_2.0.0_x64-setup.exe" \
-   dist/LunarPad-Setup-2.0.0.exe
+cp "src-tauri/target/release/bundle/nsis/Lunar Pad_2.0.1_x64-setup.exe" \
+   dist/LunarPad-Setup-2.0.1.exe
 
-git tag v2.0.0 && git push origin v2.0.0
-node tools/publish-release.mjs v2.0.0 dist/LunarPad.exe dist/LunarPad-Setup-2.0.0.exe
+git tag v2.0.1 && git push origin v2.0.1
+node tools/publish-release.mjs v2.0.1 dist/LunarPad.exe dist/LunarPad-Setup-2.0.1.exe
 ```
 
 `publish-release.mjs` creates the release and uploads its assets, generating the
