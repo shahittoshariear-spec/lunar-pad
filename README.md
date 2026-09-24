@@ -9,6 +9,20 @@ rendered by your system's webview.
 
 ![Lunar Pad](assets/lunar-pad-icon.png)
 
+## Download
+
+**[Latest release](https://github.com/shahittoshariear-spec/zen-notepad/releases/latest)**
+
+| File | Size | |
+| --- | --- | --- |
+| `LunarPad-Setup-*.exe` | 1.7 MB | Installs properly — Start Menu entry and an uninstaller. **Most people want this one.** |
+| `LunarPad.exe` | 6.4 MB | Portable. Put it anywhere and double-click it. |
+
+Both are Windows x64 and need the **WebView2 runtime**, which is already part of
+Windows 10 and 11. No Node, no .NET, no Visual C++ redistributable. Build
+artifacts are deliberately not committed to this repository — see
+[Releasing](#releasing).
+
 ## Why Rust
 
 The previous build ran on Electron, which meant shipping a whole browser and a
@@ -89,6 +103,31 @@ cargo tauri build
 This produces `Lunar Pad_2.0.0_x64-setup.exe` in
 `src-tauri/target/release/bundle/nsis/`. Run it and it installs like any other
 Windows app, with a Start Menu entry and an uninstaller.
+
+## Releasing
+
+Build artifacts are not committed. A committed binary adds a new
+multi-megabyte blob to the repository on every rebuild, permanently — deleting
+the file later does not reclaim the space. Builds belong on the Releases page.
+
+```sh
+cd src-tauri && cargo tauri build && cd ..
+
+cp src-tauri/target/release/lunar-pad.exe                       dist/LunarPad.exe
+cp "src-tauri/target/release/bundle/nsis/Lunar Pad_2.0.0_x64-setup.exe" \
+   dist/LunarPad-Setup-2.0.0.exe
+
+git tag v2.0.0 && git push origin v2.0.0
+node tools/publish-release.mjs v2.0.0 dist/LunarPad.exe dist/LunarPad-Setup-2.0.0.exe
+```
+
+`publish-release.mjs` creates the release and uploads its assets, generating the
+notes from the commit log. It reuses the credential git already stores, read
+through `git credential fill` in a child process, so the token is never printed
+or written anywhere. Re-running is safe: an existing release is updated and a
+same-named asset is replaced rather than duplicated.
+
+`dist/` is git-ignored, so a build can never creep back into history.
 
 ## Tests
 
@@ -174,8 +213,9 @@ src-tauri/          the Rust application
 ui/                 the interface
   js/               one module per concern
   css/              tokens, themes, layout, components, content, animation
-tools/              development helpers
+tools/              development and release helpers
 assets/             source artwork
+dist/               build output (git-ignored; published as a release)
 ```
 
 ### Notes on the design
