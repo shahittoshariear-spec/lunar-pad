@@ -120,6 +120,13 @@ node tools/lint-imports.mjs
 Plain JSON throughout. Back it up, diff it, or move it between machines — it is
 just a file. Nothing is sent anywhere.
 
+### Coming from the older Electron build
+
+Notes written by that version are imported as-is: the field names it used
+(`bodyHtml`, `fontFamily`, `updatedAt`) are recognised, so the text arrives
+intact. Point **Settings → Import…** at the old `notes.json`, which lives in
+`%APPDATA%\vertical-notepad\`.
+
 ## Keyboard
 
 | | |

@@ -16,14 +16,22 @@ use serde::{Deserialize, Serialize};
 pub struct Note {
     pub id: String,
     pub title: String,
+    /// The editor's HTML.
+    ///
+    /// The `bodyHtml` alias accepts notes written by the pre-Rust build, so an
+    /// existing `notes.json` imports with its text intact rather than arriving
+    /// as empty notes.
+    #[serde(alias = "bodyHtml")]
     pub body: String,
     pub plain: String,
     pub pinned: bool,
     pub trashed: bool,
     pub tags: Vec<String>,
     /// Per-note font override; empty string means "use the theme's font".
+    #[serde(alias = "fontFamily")]
     pub font: String,
     pub created: i64,
+    #[serde(alias = "updatedAt")]
     pub updated: i64,
     /// Set when the note is moved to the trash, so we can auto-purge later.
     pub trashed_at: i64,
@@ -113,4 +121,71 @@ pub fn normalise_tags(tags: &[String]) -> Vec<String> {
     }
     out.truncate(12);
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn old_field_names_are_accepted() {
+        // A note written by the pre-Rust build, which used different names.
+        let json = r#"{
+            "id": "note-1",
+            "title": "Shopping",
+            "bodyHtml": "<p>milk</p>",
+            "pinned": true,
+            "fontFamily": "Georgia, serif",
+            "order": 3,
+            "updatedAt": 1700000000000
+        }"#;
+
+        let note: Note = serde_json::from_str(json).expect("legacy note should parse");
+        assert_eq!(note.body, "<p>milk</p>");
+        assert_eq!(note.font, "Georgia, serif");
+        assert_eq!(note.updated, 1_700_000_000_000);
+        assert!(note.pinned);
+    }
+
+    #[test]
+    fn a_missing_body_is_not_an_error() {
+        let note: Note = serde_json::from_str(r#"{"id":"x","title":"t"}"#).unwrap();
+        assert!(note.body.is_empty());
+        assert_eq!(note.display_title(), "t");
+    }
+
+    #[test]
+    fn display_title_prefers_the_title_then_the_body() {
+        let mut note = Note::default();
+        assert_eq!(note.display_title(), "Untitled");
+
+        note.plain = "First line\nsecond line".into();
+        assert_eq!(note.display_title(), "First line");
+
+        note.title = "  Real title  ".into();
+        assert_eq!(note.display_title(), "Real title");
+    }
+
+    #[test]
+    fn preview_truncates_and_collapses_whitespace() {
+        let mut note = Note::default();
+        note.plain = "a   b\n\nc".into();
+        assert_eq!(note.preview(40), "a b c");
+
+        note.plain = "x".repeat(80);
+        let preview = note.preview(20);
+        assert!(preview.ends_with('…'), "preview was {preview:?}");
+    }
+
+    #[test]
+    fn tags_are_cleaned_and_deduplicated() {
+        let tags = vec![
+            "  Work ".into(),
+            "#work".into(),
+            "".into(),
+            "IDEAS".into(),
+            "a".repeat(40),
+        ];
+        assert_eq!(normalise_tags(&tags), vec!["work", "ideas"]);
+    }
 }
