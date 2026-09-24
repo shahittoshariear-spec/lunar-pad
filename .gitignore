@@ -4,6 +4,11 @@
 # Schemas Tauri generates from the capability files at build time.
 /src-tauri/gen/schemas/
 
+# Built downloads. These belong on the Releases page, not in git history — a
+# committed binary is another multi-megabyte blob in the repository forever,
+# and deleting the file later does not remove it. See tools/publish-release.mjs.
+/dist/
+
 # Icons derived from assets/lunar-pad-icon.png by `cargo tauri icon`. They are
 # regenerated on demand, but Windows needs icon.ico present to build at all, so
 # the generated set is committed rather than ignored.
