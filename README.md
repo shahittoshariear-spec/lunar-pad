@@ -94,15 +94,26 @@ Windows app, with a Start Menu entry and an uninstaller.
 
 The Rust core has a test suite covering the parts where behaviour is not
 obvious — search ranking, the query language, HTML-to-Markdown conversion,
-entity handling, filename sanitising and date arithmetic:
+entity handling, legacy note formats, filename sanitising and date arithmetic:
 
 ```sh
 cd src-tauri
 cargo test
 ```
 
-There is also a small helper that checks the interface modules for imports that
-do not resolve:
+The interface has a headless smoke test that boots the real `ui/index.html` and
+the real modules inside jsdom, then exercises the parts that are easy to break
+without noticing — that a new note actually opens for writing, that every
+dialog's buttons close it, that stacked dialogs peel one at a time, and that
+the note list hides and resizes:
+
+```sh
+npm install jsdom          # once, from the repository root
+node tools/boot-test.mjs ui
+```
+
+And a small helper that checks the interface modules for imports that do not
+resolve, or imports nothing uses:
 
 ```sh
 node tools/lint-imports.mjs
