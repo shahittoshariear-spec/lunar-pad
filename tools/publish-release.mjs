@@ -19,7 +19,16 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, statSync, existsSync } from 'node:fs';
 import { basename } from 'node:path';
 
-const REPO = process.env.LUNAR_REPO ?? 'shahittoshariear-spec/zen-notepad';
+/**
+ * Where the release goes.
+ *
+ * `slug` is re-resolved against the API before anything is written, because a
+ * renamed repository still answers on its old path with a redirect — and a
+ * redirect on a POST does not replay the body, so uploads would fail with a
+ * bare 307. Asking once for the canonical `full_name` makes all of this
+ * rename-proof.
+ */
+const TARGET = { slug: process.env.LUNAR_REPO ?? 'shahittoshariear-spec/lunar-pad' };
 const API = 'https://api.github.com';
 const UPLOADS = 'https://uploads.github.com';
 
@@ -95,6 +104,47 @@ async function api(path, { method = 'GET', body, headers = {}, raw = false } = {
 
 // ----------------------------------------------------------------- notes ---
 
+/** Parse `v1.2.3` into comparable numbers. */
+function versionNumbers(tag) {
+  return String(tag)
+    .replace(/^v/i, '')
+    .split('.')
+    .map((part) => Number.parseInt(part, 10));
+}
+
+/** True when `candidate` is a strictly higher version than `current`. */
+function isNewer(candidate, current) {
+  const a = versionNumbers(candidate);
+  const b = versionNumbers(current);
+  if (a.some(Number.isNaN) || b.some(Number.isNaN)) return false;
+
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    const left = a[i] ?? 0;
+    const right = b[i] ?? 0;
+    if (left !== right) return left > right;
+  }
+  return false;
+}
+
+/**
+ * A banner for a release that a newer one has replaced.
+ *
+ * The Releases page keeps every version, so the older ones need to say so —
+ * otherwise someone lands on a build whose bugs have since been fixed.
+ */
+async function supersedeNotice(tag) {
+  const release = (await api(`/repos/${TARGET.slug}/releases`))
+    .filter((entry) => entry.tag_name !== tag && isNewer(entry.tag_name, tag))
+    .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0];
+
+  if (!release) return '';
+
+  return (
+    `> **Superseded by [${release.name}](${release.html_url}).**\n` +
+    `> Download that one instead — it contains fixes this build does not.\n\n`
+  );
+}
+
 /** Release notes built from the commit log, so they stay current on their own. */
 function notesFor(tag) {
   const tags = spawnSync('git', ['tag', '--sort=-creatordate'], { encoding: 'utf8' })
@@ -150,10 +200,11 @@ async function main() {
     const me = await api('/user');
     console.log(`authenticated as ${me.login}`);
 
-    const repo = await api(`/repos/${REPO}`);
+    const repo = await api(`/repos/${TARGET.slug}`);
+    TARGET.slug = repo.full_name;
     console.log(`repository: ${repo.full_name} (${repo.private ? 'private' : 'public'})`);
 
-    const releases = await api(`/repos/${REPO}/releases`);
+    const releases = await api(`/repos/${TARGET.slug}/releases`);
     console.log(`existing releases: ${releases.length || 'none'}`);
     for (const release of releases) console.log(`  ${release.tag_name} — ${release.name}`);
     return;
@@ -178,26 +229,35 @@ async function main() {
   // Everything below needs the token.
   AUTH.token = token();
 
+  // Resolve the real repository name before writing anything, so a rename
+  // cannot turn an upload into a redirect that drops its body.
+  const repo = await api(`/repos/${TARGET.slug}`);
+  TARGET.slug = repo.full_name;
+  console.log(`repository: ${TARGET.slug}`);
+
   const version = tag.replace(/^v/, '');
 
   // ---- create or update the release
+  const notice = await supersedeNotice(tag);
+  const body = notice + notesFor(tag);
+
   let release;
   try {
-    release = await api(`/repos/${REPO}/releases/tags/${tag}`);
+    release = await api(`/repos/${TARGET.slug}/releases/tags/${tag}`);
     console.log(`release ${tag} already exists — updating it`);
-    release = await api(`/repos/${REPO}/releases/${release.id}`, {
+    release = await api(`/repos/${TARGET.slug}/releases/${release.id}`, {
       method: 'PATCH',
-      body: { name: `Lunar Pad ${version}`, body: notesFor(tag) },
+      body: { name: `Lunar Pad ${version}`, body },
     });
   } catch (error) {
     if (error.status !== 404) throw error;
     console.log(`creating release ${tag}`);
-    release = await api(`/repos/${REPO}/releases`, {
+    release = await api(`/repos/${TARGET.slug}/releases`, {
       method: 'POST',
       body: {
         tag_name: tag,
         name: `Lunar Pad ${version}`,
-        body: notesFor(tag),
+        body,
         draft: false,
         prerelease: false,
       },
@@ -206,15 +266,20 @@ async function main() {
 
   console.log(`release: ${release.html_url}`);
 
+  if (assets.length === 0) {
+    console.log('no assets given — release notes updated only');
+    return;
+  }
+
   // ---- replace assets that are already attached
-  const existing = await api(`/repos/${REPO}/releases/${release.id}/assets`);
+  const existing = await api(`/repos/${TARGET.slug}/releases/${release.id}/assets`);
   for (const asset of assets) {
     const name = basename(asset);
     const clash = existing.find((entry) => entry.name === name);
 
     if (clash) {
       console.log(`replacing existing asset ${name}`);
-      await api(`/repos/${REPO}/releases/assets/${clash.id}`, { method: 'DELETE' });
+      await api(`/repos/${TARGET.slug}/releases/assets/${clash.id}`, { method: 'DELETE' });
     }
 
     const bytes = readFileSync(asset);
@@ -222,7 +287,7 @@ async function main() {
     console.log(`uploading ${name} (${mb} MB)…`);
 
     await api(
-      `${UPLOADS}/repos/${REPO}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`,
+      `${UPLOADS}/repos/${TARGET.slug}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`,
       {
         method: 'POST',
         raw: true,
@@ -232,7 +297,7 @@ async function main() {
     );
   }
 
-  const final = await api(`/repos/${REPO}/releases/${release.id}`);
+  const final = await api(`/repos/${TARGET.slug}/releases/${release.id}`);
   console.log('\nrelease ready with assets:');
   for (const asset of final.assets) {
     console.log(`  ${asset.name}  (${(asset.size / 1_048_576).toFixed(1)} MB)`);

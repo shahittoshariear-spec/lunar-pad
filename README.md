@@ -11,7 +11,7 @@ rendered by your system's webview.
 
 ## Download
 
-**[Latest release](https://github.com/shahittoshariear-spec/zen-notepad/releases/latest)**
+**[Latest release](https://github.com/shahittoshariear-spec/lunar-pad/releases/latest)**
 
 | File | Size | |
 | --- | --- | --- |
